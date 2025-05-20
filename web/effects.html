@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wuthering Waves Style Summon</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: transparent;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        #summon-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            background-color: transparent;
+        }
+        
+        .summon-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            background-color: transparent;
+        }
+        
+        .summon-effect.active {
+            opacity: 1;
+        }
+        
+        .summon-effect.fade-out {
+            opacity: 0;
+            transition: opacity 1.5s;
+        }
+        
+        .light-beam {
+            position: absolute;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            z-index: 2;
+            opacity: 0;
+        }
+        
+        .summon-effect.active .light-beam {
+            animation: beam-sweep 2s ease-in-out forwards;
+        }
+        
+        @keyframes beam-sweep {
+            0% { width: 0; left: -10%; opacity: 0; }
+            10% { opacity: 1; }
+            50% { width: 120%; left: -10%; opacity: 1; }
+            100% { width: 120%; left: 100%; opacity: 0; }
+        }
+        
+        .circle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3;
+            transform: scale(0);
+        }
+        
+        .summon-effect.active .circle-container {
+            animation: circle-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 0.5s;
+        }
+        
+        @keyframes circle-appear {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        
+        .outer-circle, .middle-circle, .inner-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .outer-circle {
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .middle-circle {
+            width: 220px;
+            height: 220px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .inner-circle {
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+        }
+        
+        .summon-effect.active .outer-circle {
+            animation: circle-rotate 20s linear infinite, fade-in 0.5s forwards;
+            animation-delay: 0s, 0.6s;
+        }
+        
+        .summon-effect.active .middle-circle {
+            animation: circle-rotate-reverse 15s linear infinite, fade-in 0.5s forwards;
+            animation-delay: 0s, 0.8s;
+        }
+        
+        .summon-effect.active .inner-circle {
+            animation: circle-rotate 10s linear infinite, fade-in 0.5s forwards;
+            animation-delay: 0s, 1s;
+        }
+        
+        @keyframes circle-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes circle-rotate-reverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+        
+        @keyframes fade-in {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .rarity-symbol {
+            position: absolute;
+            font-size: 80px;
+            color: white;
+            text-shadow: 0 0 20px currentColor;
+            opacity: 0;
+            transform: scale(0.5);
+            z-index: 4;
+        }
+        
+        .summon-effect.active .rarity-symbol {
+            animation: symbol-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 1.2s;
+        }
+        
+        @keyframes symbol-appear {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .energy-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        .energy-particle {
+            position: absolute;
+            width: 4px;
+            height: 40px;
+            background: currentColor;
+            border-radius: 2px;
+            opacity: 0;
+            transform-origin: center bottom;
+        }
+        
+        .summon-effect.active .energy-particle {
+            animation: particle-rise 2s ease-out forwards;
+        }
+        
+        @keyframes particle-rise {
+            0% { transform: translateY(100px) scale(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-300px) scale(1); opacity: 0; }
+        }
+        
+        .result-card {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            opacity: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 300px;
+            text-align: center;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            transform: translateX(-100%);
+        }
+        
+        .summon-effect.active .result-card {
+            animation: card-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 2s;
+        }
+        
+        .summon-effect.active .result-card::before {
+            animation: card-shine 2s ease-in-out infinite;
+            animation-delay: 2.5s;
+        }
+        
+        @keyframes card-appear {
+            0% { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        
+        @keyframes card-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .rarity-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            font-weight: 300;
+        }
+        
+        .username-display {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        /* Gold Summon Style */
+        .gold {
+            --main-color: #ffd700;
+            --glow-color: rgba(255, 215, 0, 0.7);
+        }
+        
+        .gold .outer-circle, .gold .middle-circle, .gold .inner-circle {
+            border-color: rgba(255, 215, 0, 0.7);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .gold .rarity-symbol, .gold .energy-particle {
+            color: #ffd700;
+        }
+        
+        .gold .result-card {
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(50, 40, 0, 0.7) 100%);
+        }
+        
+        .gold .rarity-label {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .gold .username-display {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .purple {
+            --main-color: #9d4edd;
+            --glow-color: rgba(157, 78, 221, 0.7);
+        }
+        
+        .purple .outer-circle, .purple .middle-circle, .purple .inner-circle {
+            border-color: rgba(157, 78, 221, 0.7);
+            box-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
+        }
+        
+        .purple .rarity-symbol, .purple .energy-particle {
+            color: #9d4edd;
+        }
+        
+        .purple .result-card {
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(40, 0, 50, 0.7) 100%);
+        }
+        
+        .purple .rarity-label {
+            color: #d8a2ff;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.7);
+        }
+        
+        .purple .username-display {
+            color: white;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.7);
+        }
+        
+        .blue {
+            --main-color: #4d9de0;
+            --glow-color: rgba(77, 157, 224, 0.7);
+        }
+        
+        .blue .outer-circle, .blue .middle-circle, .blue .inner-circle {
+            border-color: rgba(77, 157, 224, 0.7);
+            box-shadow: 0 0 15px rgba(77, 157, 224, 0.5);
+        }
+        
+        .blue .rarity-symbol, .blue .energy-particle {
+            color: #4d9de0;
+        }
+        
+        .blue .result-card {
+            border: 1px solid rgba(77, 157, 224, 0.3);
+            box-shadow: 0 0 20px rgba(77, 157, 224, 0.3);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 30, 50, 0.7) 100%);
+        }
+        
+        .blue .rarity-label {
+            color: #a2d2ff;
+            text-shadow: 0 0 10px rgba(77, 157, 224, 0.7);
+        }
+        
+        .blue .username-display {
+            color: white;
+            text-shadow: 0 0 10px rgba(77, 157, 224, 0.7);
+        }
+
+        .wheel-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+            .wheel-container.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            transform: scale(0.5);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .wheel-container.active .wheel-wrapper {
+            transform: scale(1);
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+            transition: transform 5s cubic-bezier(0.19, 1, 0.22, 1);
+            background: #333;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .wheel-segment span {
+                position: absolute;
+                width: 120px;
+                left: 10%;
+                top: 15%;
+                transform-origin: center;
+                font-weight: bold;
+                font-size: 14px;
+                color: white;
+                text-shadow: 1px 1px 2px black;
+                text-align: center;
+            }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: #ffd700;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 2;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+        }
+
+        .wheel-result {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+            .wheel-result.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+    </style>
+</head>
+<body>
+    <div id="summon-container"></div>
+    <div class="wheel-container">
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="fortune-wheel"></div>
+            <div class="wheel-result" id="wheel-result"></div>
+        </div>
+    </div>
+    <script>
+        let socket;
+        let reconnectInterval = 1000;
+        let isConnected = false;
+        function connectWebSocket() {
+            socket = new WebSocket('ws://localhost:5000');
+
+            socket.onopen = function () {
+                console.log('WebSocket-Verbindung hergestellt');
+                isConnected = true;
+                reconnectInterval = 1000;
+            };
+            socket.onmessage = function (event) {
+                console.log('Nachricht erhalten:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'summon') {
+                        if (data.rarity === 'gold') {
+                            showGoldWheelAfterSummon(data.username);
+                        } else {
+                            showSummonEffect(data.rarity, data.username);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Verarbeiten der Nachricht:', error);
+                }
+            };
+
+            socket.onclose = function () {
+                console.log('WebSocket-Verbindung geschlossen');
+                isConnected = false;
+                setTimeout(function () {
+                    console.log(`Versuche erneut zu verbinden in ${reconnectInterval / 1000} Sekunden...`);
+                    connectWebSocket();
+                    reconnectInterval = Math.min(reconnectInterval * 1.5, 30000);
+                }, reconnectInterval);
+            };
+            socket.onerror = function (error) {
+                console.error('WebSocket-Fehler:', error);
+            };
+        }
+
+        function createEnergyParticles(container, rarity) {
+            const particlesContainer = document.createElement('div');
+            particlesContainer.className = 'energy-particles';
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'energy-particle';
+
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = -Math.random() * 50 + 'px';
+
+                const scale = 0.5 + Math.random() * 1.5;
+                particle.style.transform = `scale(${scale})`;
+
+                particle.style.animationDelay = (1 + Math.random() * 3) + 's';
+
+                particlesContainer.appendChild(particle);
+            }
+
+            container.appendChild(particlesContainer);
+        }
+
+        function showSummonEffect(rarity, username) {
+            const container = document.getElementById('summon-container');
+
+            const effectElement = document.createElement('div');
+            effectElement.className = `summon-effect ${rarity}`;
+
+            const lightBeam = document.createElement('div');
+            lightBeam.className = 'light-beam';
+            effectElement.appendChild(lightBeam);
+
+            const circleContainer = document.createElement('div');
+            circleContainer.className = 'circle-container';
+
+            const outerCircle = document.createElement('div');
+            outerCircle.className = 'outer-circle';
+
+            const middleCircle = document.createElement('div');
+            middleCircle.className = 'middle-circle';
+
+            const innerCircle = document.createElement('div');
+            innerCircle.className = 'inner-circle';
+
+            circleContainer.appendChild(outerCircle);
+            circleContainer.appendChild(middleCircle);
+            circleContainer.appendChild(innerCircle);
+
+            const raritySymbol = document.createElement('div');
+            raritySymbol.className = 'rarity-symbol';
+
+            switch (rarity) {
+                case 'gold': raritySymbol.innerHTML = '★★★'; break;
+                case 'purple': raritySymbol.innerHTML = '★★'; break;
+                case 'blue': raritySymbol.innerHTML = '★'; break;
+                default: raritySymbol.innerHTML = '★';
+            }
+
+            circleContainer.appendChild(raritySymbol);
+            effectElement.appendChild(circleContainer);
+
+            createEnergyParticles(effectElement, rarity);
+
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+
+            const rarityLabel = document.createElement('div');
+            rarityLabel.className = 'rarity-label';
+
+            switch (rarity) {
+                case 'gold': rarityLabel.textContent = 'Legendärer Summon'; break;
+                case 'purple': rarityLabel.textContent = 'Epischer Summon'; break;
+                case 'blue': rarityLabel.textContent = 'Seltener Summon'; break;
+                default: rarityLabel.textContent = 'Summon';
+            }
+
+            const usernameElement = document.createElement('div');
+            usernameElement.className = 'username-display';
+            usernameElement.textContent = username;
+
+            resultCard.appendChild(rarityLabel);
+            resultCard.appendChild(usernameElement);
+            effectElement.appendChild(resultCard);
+
+            container.appendChild(effectElement);
+
+            const sound = new Audio(`sounds/${rarity}.mp3`);
+            sound.volume = 0.5;
+            sound.play().catch(error => {
+                console.error('Fehler beim Abspielen des Sounds:', error);
+            });
+
+            setTimeout(() => {
+                effectElement.classList.add('active');
+            }, 100);
+
+            setTimeout(() => {
+                effectElement.classList.add('fade-out');
+                effectElement.classList.remove('active');
+
+                setTimeout(() => {
+                    container.removeChild(effectElement);
+                }, 1500);
+            }, 8000);
+        }
+
+        function createWheel(prizes) {
+            const wheel = document.getElementById('fortune-wheel');
+            wheel.innerHTML = '';
+            const segmentAngle = 360 / prizes.length;
+
+            const centerPoint = document.createElement('div');
+            centerPoint.style.position = 'absolute';
+            centerPoint.style.width = '10px';
+            centerPoint.style.height = '10px';
+            centerPoint.style.borderRadius = '50%';
+            centerPoint.style.backgroundColor = 'white';
+            centerPoint.style.top = '50%';
+            centerPoint.style.left = '50%';
+            centerPoint.style.transform = 'translate(-50%, -50%)';
+            centerPoint.style.zIndex = '10';
+            wheel.appendChild(centerPoint);
+
+            const wheelRadius = wheel.offsetWidth / 2;
+
+            // Speichere die Preise als Dateneigenschaft am Rad
+            wheel.dataset.prizes = JSON.stringify(prizes);
+
+            prizes.forEach((prize, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.dataset.prize = prize; // Speichere den Preis im Segment
+                segment.dataset.index = index; // Speichere den Index im Segment
+                segment.style.transform = `rotate(${index * segmentAngle}deg)`;
+                segment.style.backgroundColor = index % 2 === 0 ? '#444' : '#333';
+                wheel.appendChild(segment);
+
+                const label = document.createElement('span'); // Ändere zu span für einfachere Auswahl
+                label.textContent = prize;
+                label.dataset.prize = prize; // Speichere den Preis auch im Label
+                label.style.position = 'absolute';
+                label.style.width = '100px';
+                label.style.textAlign = 'center';
+                label.style.color = 'white';
+                label.style.fontWeight = 'bold';
+                label.style.fontSize = '14px';
+                label.style.textShadow = '1px 1px 2px black';
+                label.style.zIndex = '5';
+
+                const angle = (index * segmentAngle) + (segmentAngle / 2);
+                const angleInRadians = (angle * Math.PI) / 180;
+                const textDistance = wheelRadius * 0.7; 
+                const x = wheelRadius + Math.cos(angleInRadians) * textDistance;
+                const y = wheelRadius + Math.sin(angleInRadians) * textDistance;
+
+                label.style.left = `${x - 50}px`; 
+                label.style.top = `${y - 10}px`; 
+                label.style.transform = `rotate(${angle + 90}deg)`;
+
+                wheel.appendChild(label);
+            });
+
+            // Debug nach dem Erstellen des Rads
+            debugWheelSegments();
+        }
+
+        function debugWheelSegments() {
+            const wheel = document.getElementById('fortune-wheel');
+
+            // Hole die Preise direkt aus dem Dataset des Rads
+            let prizes = [];
+            try {
+                if (wheel.dataset.prizes) {
+                    prizes = JSON.parse(wheel.dataset.prizes);
+                }
+            } catch (e) {
+                console.error("Fehler beim Parsen der Preise:", e);
+            }
+
+            if (prizes.length === 0) {
+                const segments = wheel.querySelectorAll('.wheel-segment');
+                segments.forEach(segment => {
+                    if (segment.dataset.prize) {
+                        prizes.push(segment.dataset.prize);
+                    }
+                });
+            }
+
+            if (prizes.length === 0) {
+                const labels = wheel.querySelectorAll('span');
+                labels.forEach(label => {
+                    if (label.textContent && label.textContent.trim() !== '') {
+                        prizes.push(label.textContent);
+                    }
+                });
+            }
+
+            console.log("Wheel segments debugging:");
+            console.log("Total prizes:", prizes.length);
+            console.log("Prizes:", prizes);
+
+            // Zeige die Winkel für jedes Segment an
+            if (prizes.length > 0) {
+                const segmentAngle = 360 / prizes.length;
+                prizes.forEach((prize, index) => {
+                    const startAngle = index * segmentAngle;
+                    const endAngle = (index + 1) * segmentAngle;
+                    const midAngle = startAngle + (segmentAngle / 2);
+                    console.log(`Segment ${index}: Prize ${prize}, Angle range: ${startAngle}° - ${endAngle}°, Mid: ${midAngle}°`);
+                });
+            }
+        }
+
+        function spinWheel(prizes, callback) {
+            const wheelContainer = document.querySelector('.wheel-container');
+            const wheel = document.getElementById('fortune-wheel');
+            const resultDisplay = document.getElementById('wheel-result');
+
+            if (wheel.children.length === 0) {
+                createWheel(prizes);
+            }
+
+            wheelContainer.classList.add('active');
+            resultDisplay.classList.remove('show');
+            resultDisplay.textContent = '';
+
+            const winningIndex = Math.floor(Math.random() * prizes.length);
+            const winningPrize = prizes[winningIndex];
+            console.log(`Selected winning prize: ${winningPrize} at index ${winningIndex}`);
+
+            const segmentAngle = 360 / prizes.length;
+            const rotations = 5;
+
+            const targetAngle = 360 - (winningIndex * segmentAngle) - (segmentAngle / 2);
+            const totalAngle = (rotations * 360) + targetAngle;
+
+            console.log(`Segment angle: ${segmentAngle}, Target angle: ${targetAngle}, Total angle: ${totalAngle}`);
+
+            window.wheelWinningPrize = winningPrize;
+            window.wheelWinningIndex = winningIndex;
+
+            // Reset
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'rotate(0deg)';
+            void wheel.offsetWidth;
+
+            wheel.style.transition = 'transform 5s cubic-bezier(0.19, 1, 0.22, 1)';
+            wheel.style.transform = `rotate(${totalAngle}deg)`;
+
+            setTimeout(() => {
+                if (callback) {
+                    setTimeout(callback, 3000);
+                }
+            }, 5000);
+        }
+
+
+        function showGoldWheelAfterSummon(username) {
+            const prizes = [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8"
+            ];
+
+            showSummonEffect('gold', username);
+
+            setTimeout(() => {
+                spinWheel(prizes, () => {
+                    document.querySelector('.wheel-container').classList.remove('active');
+                });
+            }, 8500); 
+        }
+
+
+        window.addEventListener('load', function () {
+            connectWebSocket();
+
+
+            // Für Testzwecke
+            document.addEventListener('keydown', function (event) {
+                if (event.key === '1') showSummonEffect('blue', 'TestUser');
+                if (event.key === '2') showSummonEffect('purple', 'TestUser');
+                if (event.key === '3') {
+                    showSummonEffect('gold', 'TestUser');
+
+                    setTimeout(() => {
+                        const testPrizes = [
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "6",
+                            "7"                           
+                        ];
+                        spinWheel(testPrizes, () => {
+                            document.querySelector('.wheel-container').classList.remove('active');
+                        });
+                    }, 8500);
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>
